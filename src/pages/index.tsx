@@ -100,9 +100,9 @@ const Board = (props: Board) => {
   if (!data) return <div>No challenge</div>;
 
   return (
-    <div className="flex min-h-[400px] flex-col items-center gap-8 ">
+    <div className="flex flex-col items-center gap-8 ">
       <ul
-        className=" grid h-[30rem] w-[30rem] grid-cols-4 grid-rows-4 gap-1 p-2"
+        className=" grid h-full w-[80vw] max-w-[500px] grid-cols-4 grid-rows-4 gap-1 p-2"
         ref={parent}
       >
         {tiles.map((tile, index) => {
@@ -126,7 +126,7 @@ const Board = (props: Board) => {
           mutate({ puzzleId: data.id });
         }}
         disabled={!send}
-        className="h-12 w-1/3 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 disabled:bg-gray-400"
+        className="h-12 w-auto rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 disabled:bg-gray-400"
       >
         Get it!
       </button>
@@ -153,7 +153,7 @@ const Tile = (props: {
         backgroundSize: `${GRID_SIZE * 100}%`,
         backgroundImage: `url(${props.imgUrl})`,
       }}
-      className="flex items-center justify-center text-2xl font-bold"
+      className="flex aspect-square items-center justify-center text-2xl font-bold"
       onClick={() => props.handleTileClick(props.index)}
     >
       <span>{`${props.tile + 1}`}</span>
@@ -169,7 +169,7 @@ const Home = ({ tiles }: InferGetStaticPropsType<typeof getStaticProps>) => {
         <meta name="description" content="NotNini Puzzle Game" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen min-w-[50%] items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <Board tiles={tiles} />
       </main>
     </>
