@@ -1,0 +1,33 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Puzzle {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String   @db.VarChar(255)
+  description String
+  puzzleImg   String
+
+  SolvedPuzzle SolvedPuzzle[]
+}
+
+model SolvedPuzzle {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  puzzleId  String
+  puzzle    Puzzle   @relation(fields: [puzzleId], references: [id])
+  userId    String
+
+  @@index([userId])
+  @@index([puzzleId])
+}
