@@ -4,6 +4,7 @@ import Head from "next/head";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import { helpers } from "../server/helpers/ssgHelper";
+import Confetti from "react-confetti";
 
 const TILE_COUNT = 16;
 const GRID_SIZE = Math.sqrt(TILE_COUNT);
@@ -39,6 +40,8 @@ const Board = (props: Board) => {
   const [tiles, setTiles] = useState(props.tiles);
   const [parent] = useAutoAnimate();
   const { data } = api.puzzle.getPuzzle.useQuery();
+  const [send, setSend] = useState(false);
+  const { mutate } = api.puzzle.solvePuzzle.useMutation();
 
   const hasWon = useCallback(() => {
     return tiles.every((tile, index) => {
@@ -47,7 +50,10 @@ const Board = (props: Board) => {
   }, [tiles]);
 
   useEffect(() => {
-    if (hasWon()) console.log("You won!");
+    if (hasWon()) {
+      console.log("You won!");
+    }
+    setSend(hasWon());
   }, [tiles, hasWon]);
 
   const handleTileClick = (index: number) => {
@@ -94,9 +100,9 @@ const Board = (props: Board) => {
   if (!data) return <div>No challenge</div>;
 
   return (
-    <>
+    <div className="flex min-h-[400px] flex-col items-center gap-8 ">
       <ul
-        className="relative grid h-80 w-80 grid-cols-4 grid-rows-4 gap-1 p-2"
+        className=" grid h-[30rem] w-[30rem] grid-cols-4 grid-rows-4 gap-1 p-2"
         ref={parent}
       >
         {tiles.map((tile, index) => {
@@ -105,15 +111,27 @@ const Board = (props: Board) => {
               key={index}
               index={index}
               tile={tile}
-              width={34}
-              height={34}
+              width={40}
+              height={40}
               handleTileClick={handleTileClick}
               imgUrl={data.puzzleImg}
             />
           );
         })}
       </ul>
-    </>
+
+      <button
+        ref={parent}
+        onClick={() => {
+          mutate({ puzzleId: data.id });
+        }}
+        disabled={!send}
+        className="h-12 w-1/3 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 disabled:bg-gray-400"
+      >
+        Get it!
+      </button>
+      {send && <Confetti tweenDuration={150} />}
+    </div>
   );
 };
 
@@ -151,7 +169,7 @@ const Home = ({ tiles }: InferGetStaticPropsType<typeof getStaticProps>) => {
         <meta name="description" content="NotNini Puzzle Game" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex min-h-screen min-w-[50%] items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <Board tiles={tiles} />
       </main>
     </>
@@ -159,8 +177,8 @@ const Home = ({ tiles }: InferGetStaticPropsType<typeof getStaticProps>) => {
 };
 
 export const getStaticProps: GetStaticProps<Board> = async () => {
-  const shuffledTiles = shuffleTiles(tilesArray);
-  // const shuffledTiles = tilesArray;
+  // const shuffledTiles = shuffleTiles(tilesArray);
+  const shuffledTiles = tilesArray;
 
   await helpers.puzzle.getPuzzle.prefetch();
 
@@ -169,7 +187,7 @@ export const getStaticProps: GetStaticProps<Board> = async () => {
       trpcState: helpers.dehydrate(),
       tiles: shuffledTiles,
     },
-    revalidate: 10,
+    revalidate: 3600,
   };
 };
 

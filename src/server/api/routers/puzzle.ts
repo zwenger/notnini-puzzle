@@ -13,4 +13,20 @@ export const puzzleRouter = createTRPCRouter({
       },
     })
   ),
+
+  solvePuzzle: publicProcedure
+    .input(
+      z.object({
+        puzzleId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const solved = await ctx.prisma.solvedPuzzle.create({
+        data: {
+          puzzleId: input.puzzleId,
+          userId: "pepe",
+        },
+      });
+      return solved;
+    }),
 });
