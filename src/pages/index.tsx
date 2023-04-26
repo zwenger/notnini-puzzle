@@ -1,7 +1,7 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import Head from "next/head";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "~/utils/api";
 
 const TILE_COUNT = 16;
@@ -40,6 +40,16 @@ const shuffleTiles = (tiles: number[]) => {
 const Board = (props: Board) => {
   const [tiles, setTiles] = useState(props.tiles);
   const [parent] = useAutoAnimate();
+
+  const hasWon = useCallback(() => {
+    return tiles.every((tile, index) => {
+      return tile === index;
+    });
+  }, [tiles]);
+
+  useEffect(() => {
+    if (hasWon()) console.log("You won!");
+  }, [tiles, hasWon]);
 
   const handleTileClick = (index: number) => {
     swapTiles(index);
@@ -152,6 +162,8 @@ const Home = ({
 
 export const getStaticProps: GetStaticProps<Board> = () => {
   const shuffledTiles = shuffleTiles(tilesArray);
+  // const shuffledTiles = tilesArray;
+
   const img =
     "https://media.licdn.com/dms/image/C4D22AQFDEFZhAqNbuQ/feedshare-shrink_800/0/1671392596051?e=1684368000&v=beta&t=3Up_xoi7QMAwlyDXfoflE0pZf1_qXgPjyx8DYxA3_6k";
   return {
