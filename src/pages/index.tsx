@@ -3,16 +3,14 @@ import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import Head from "next/head";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "~/utils/api";
+import { helpers } from "../server/helpers/ssgHelper";
 
 const TILE_COUNT = 16;
-const IMG =
-  "https://media.licdn.com/dms/image/C4D22AQFDEFZhAqNbuQ/feedshare-shrink_800/0/1671392596051?e=1684368000&v=beta&t=3Up_xoi7QMAwlyDXfoflE0pZf1_qXgPjyx8DYxA3_6k";
 const GRID_SIZE = Math.sqrt(TILE_COUNT);
 const tilesArray = [...Array(TILE_COUNT).keys()];
 
 type Board = {
   tiles: number[];
-  img: string;
 };
 
 const swap = (tiles: number[], src: number, dest: number) => {
@@ -40,6 +38,7 @@ const shuffleTiles = (tiles: number[]) => {
 const Board = (props: Board) => {
   const [tiles, setTiles] = useState(props.tiles);
   const [parent] = useAutoAnimate();
+  const { data } = api.puzzle.getPuzzle.useQuery();
 
   const hasWon = useCallback(() => {
     return tiles.every((tile, index) => {
@@ -92,6 +91,8 @@ const Board = (props: Board) => {
     return tilesResult;
   };
 
+  if (!data) return <div>No challenge</div>;
+
   return (
     <>
       <ul
@@ -107,7 +108,7 @@ const Board = (props: Board) => {
               width={34}
               height={34}
               handleTileClick={handleTileClick}
-              imgUrl={props.img}
+              imgUrl={data.puzzleImg}
             />
           );
         })}
@@ -132,7 +133,7 @@ const Tile = (props: {
           (100 / (GRID_SIZE - 1)) * (props.tile % GRID_SIZE)
         }% ${(100 / (GRID_SIZE - 1)) * Math.floor(props.tile / GRID_SIZE)}%`,
         backgroundSize: `${GRID_SIZE * 100}%`,
-        backgroundImage: `url(${IMG})`,
+        backgroundImage: `url(${props.imgUrl})`,
       }}
       className="flex items-center justify-center text-2xl font-bold"
       onClick={() => props.handleTileClick(props.index)}
@@ -142,10 +143,7 @@ const Tile = (props: {
   );
 };
 
-const Home = ({
-  tiles,
-  img,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
+const Home = ({ tiles }: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <>
       <Head>
@@ -154,22 +152,22 @@ const Home = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <Board tiles={tiles} img={img} />
+        <Board tiles={tiles} />
       </main>
     </>
   );
 };
 
-export const getStaticProps: GetStaticProps<Board> = () => {
+export const getStaticProps: GetStaticProps<Board> = async () => {
   const shuffledTiles = shuffleTiles(tilesArray);
   // const shuffledTiles = tilesArray;
 
-  const img =
-    "https://media.licdn.com/dms/image/C4D22AQFDEFZhAqNbuQ/feedshare-shrink_800/0/1671392596051?e=1684368000&v=beta&t=3Up_xoi7QMAwlyDXfoflE0pZf1_qXgPjyx8DYxA3_6k";
+  await helpers.puzzle.getPuzzle.prefetch();
+
   return {
     props: {
+      trpcState: helpers.dehydrate(),
       tiles: shuffledTiles,
-      img,
     },
   };
 };

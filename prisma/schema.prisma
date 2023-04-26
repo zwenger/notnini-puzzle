@@ -16,6 +16,7 @@ model Puzzle {
   name        String   @db.VarChar(255)
   description String
   puzzleImg   String
+  available   DateTime
 
   SolvedPuzzle SolvedPuzzle[]
 }
