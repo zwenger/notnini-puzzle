@@ -7,7 +7,7 @@ export const puzzleRouter = createTRPCRouter({
     ctx.prisma.puzzle.findFirstOrThrow({
       where: {
         available: {
-          lte: new Date(new Date().setHours(24, 0, 0, 0)),
+          lte: new Date(new Date().setHours(23, 59, 59, 0)),
           gte: new Date(new Date().setHours(0, 0, 0, 0)),
         },
       },
