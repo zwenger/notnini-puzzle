@@ -1,15 +1,44 @@
-import { type NextPage } from "next";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { api } from "~/utils/api";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+
+const TILE_COUNT = 16;
 const IMG =
   "https://media.licdn.com/dms/image/C4D22AQFDEFZhAqNbuQ/feedshare-shrink_800/0/1671392596051?e=1684368000&v=beta&t=3Up_xoi7QMAwlyDXfoflE0pZf1_qXgPjyx8DYxA3_6k";
-const TILE_COUNT = 16;
 const GRID_SIZE = Math.sqrt(TILE_COUNT);
+const tilesArray = [...Array(TILE_COUNT).keys()];
 
-const Board = () => {
-  const [tiles, setTiles] = useState([...Array(TILE_COUNT).keys()]);
+type Board = {
+  tiles: number[];
+  img: string;
+};
+
+const swap = (tiles: number[], src: number, dest: number) => {
+  const tilesResult = [...tiles];
+
+  const tempSrc = tilesResult[src];
+  const tempDest = tilesResult[dest];
+
+  if (tempSrc === undefined || tempDest === undefined) return tilesResult;
+
+  [tilesResult[src], tilesResult[dest]] = [tempDest, tempSrc];
+
+  return tilesResult;
+};
+
+const shuffleTiles = (tiles: number[]) => {
+  let shuffledTiles = [...tiles];
+  for (let i = shuffledTiles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    shuffledTiles = swap(shuffledTiles, i, j);
+  }
+  return shuffledTiles;
+};
+
+const Board = (props: Board) => {
+  const [tiles, setTiles] = useState(props.tiles);
   const [parent] = useAutoAnimate();
 
   const handleTileClick = (index: number) => {
@@ -33,12 +62,12 @@ const Board = () => {
     return Math.abs(srcRow - destRow) + Math.abs(srcCol - destCol) === 1;
   };
 
-  function getMatrixPosition(index: number) {
+  const getMatrixPosition = (index: number) => {
     return {
       row: Math.floor(index / GRID_SIZE),
       col: index % GRID_SIZE,
     };
-  }
+  };
 
   const swap = (tiles: number[], src: number, dest: number) => {
     const tilesResult = [...tiles];
@@ -68,7 +97,7 @@ const Board = () => {
               width={34}
               height={34}
               handleTileClick={handleTileClick}
-              imgUrl={""}
+              imgUrl={props.img}
             />
           );
         })}
@@ -95,15 +124,18 @@ const Tile = (props: {
         backgroundSize: `${GRID_SIZE * 100}%`,
         backgroundImage: `url(${IMG})`,
       }}
-      className="flex items-center justify-center bg-red-300 text-2xl font-bold"
+      className="flex items-center justify-center text-2xl font-bold"
       onClick={() => props.handleTileClick(props.index)}
     >
-      <span>{!props.imgUrl && `${props.tile + 1}`}</span>
+      <span>{`${props.tile + 1}`}</span>
     </li>
   );
 };
 
-const Home: NextPage = () => {
+const Home = ({
+  tiles,
+  img,
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
   return (
     <>
       <Head>
@@ -112,10 +144,22 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <Board />
+        <Board tiles={tiles} img={img} />
       </main>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps<Board> = () => {
+  const shuffledTiles = shuffleTiles(tilesArray);
+  const img =
+    "https://media.licdn.com/dms/image/C4D22AQFDEFZhAqNbuQ/feedshare-shrink_800/0/1671392596051?e=1684368000&v=beta&t=3Up_xoi7QMAwlyDXfoflE0pZf1_qXgPjyx8DYxA3_6k";
+  return {
+    props: {
+      tiles: shuffledTiles,
+      img,
+    },
+  };
 };
 
 export default Home;
