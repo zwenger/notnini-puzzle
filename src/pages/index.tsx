@@ -169,6 +169,7 @@ export const getStaticProps: GetStaticProps<Board> = async () => {
       trpcState: helpers.dehydrate(),
       tiles: shuffledTiles,
     },
+    revalidate: 10,
   };
 };
 
