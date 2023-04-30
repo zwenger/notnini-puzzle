@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 import { helpers } from "../server/helpers/ssgHelper";
 import Confetti from "react-confetti";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { toast } from "react-hot-toast";
 
 const TILE_COUNT = 16;
 const GRID_SIZE = Math.sqrt(TILE_COUNT);
@@ -14,7 +15,6 @@ const tilesArray = [...Array(TILE_COUNT).keys()];
 type Board = {
   tiles: number[];
 };
-
 const swap = (tiles: number[], src: number, dest: number) => {
   const tilesResult = [...tiles];
 
@@ -68,6 +68,10 @@ const Board = (props: Board) => {
   }, [tiles, hasWon]);
 
   const handleTileClick = (index: number) => {
+    if (!isSignedIn) {
+      toast.error("Sign in to play!");
+      return;
+    }
     swapTiles(index);
   };
 
@@ -178,7 +182,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   const { isSignedIn } = useUser();
 
   return (
-    <div className="bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+    <div className="h-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
       <Head>
         <title>Not Nini Puzzle</title>
         <meta name="description" content="NotNini Puzzle Game" />
@@ -204,7 +208,7 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
           />
         )}
       </nav>
-      <main className="flex h-screen w-screen flex-col items-center justify-center  ">
+      <main className="flex w-screen flex-col items-center justify-center pt-6  ">
         <Board tiles={tiles} />
       </main>
     </div>
