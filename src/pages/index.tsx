@@ -1,10 +1,11 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import type { InferGetStaticPropsType, GetStaticProps } from "next";
+import type { InferGetStaticPropsType, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import { helpers } from "../server/helpers/ssgHelper";
 import Confetti from "react-confetti";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 
 const TILE_COUNT = 16;
 const GRID_SIZE = Math.sqrt(TILE_COUNT);
@@ -37,6 +38,8 @@ const shuffleTiles = (tiles: number[]) => {
 };
 
 const Board = (props: Board) => {
+  const { isSignedIn } = useUser();
+
   const [tiles, setTiles] = useState(props.tiles);
   const [parent] = useAutoAnimate();
   const { data } = api.puzzle.getPuzzle.useQuery();
@@ -125,7 +128,7 @@ const Board = (props: Board) => {
         onClick={() => {
           mutate({ puzzleId: data.id });
         }}
-        disabled={!send}
+        disabled={!send || !isSignedIn}
         className="h-12 w-auto rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 disabled:bg-gray-400"
       >
         Get it!
@@ -161,18 +164,42 @@ const Tile = (props: {
   );
 };
 
-const Home = ({ tiles }: InferGetStaticPropsType<typeof getStaticProps>) => {
+const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
+  tiles,
+}) => {
+  const { isSignedIn } = useUser();
+
   return (
-    <>
+    <div className="bg-gradient-to-b from-[#2e026d] to-[#15162c]">
       <Head>
         <title>Not Nini Puzzle</title>
         <meta name="description" content="NotNini Puzzle Game" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex h-screen w-screen items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <nav className="opacity-85 border-b-1 h-auto min-h-[50px] border-black p-2 shadow-lg">
+        {!isSignedIn ? (
+          <SignInButton>
+            <button className="w-auto rounded bg-[#9B42F3] px-4 py-2 font-bold text-white hover:bg-[#9b42f3ae] disabled:bg-gray-400">
+              Sign in
+            </button>
+          </SignInButton>
+        ) : (
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: {
+                  width: 40,
+                  height: 40,
+                },
+              },
+            }}
+          />
+        )}
+      </nav>
+      <main className="flex h-screen w-screen flex-col items-center justify-center  ">
         <Board tiles={tiles} />
       </main>
-    </>
+    </div>
   );
 };
 
