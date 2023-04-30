@@ -45,6 +45,7 @@ const Board = (props: Board) => {
   const { data } = api.puzzle.getPuzzle.useQuery();
   const [send, setSend] = useState(false);
   const { mutate } = api.puzzle.solvePuzzle.useMutation();
+  const [confetti, setConfetti] = useState(true);
 
   const hasWon = useCallback(() => {
     return tiles.every((tile, index) => {
@@ -53,10 +54,17 @@ const Board = (props: Board) => {
   }, [tiles]);
 
   useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
     if (hasWon()) {
       console.log("You won!");
+      timeout = setTimeout(() => {
+        setConfetti(false);
+      }, 5000);
     }
     setSend(hasWon());
+    setConfetti(hasWon());
+    return () => clearTimeout(timeout);
   }, [tiles, hasWon]);
 
   const handleTileClick = (index: number) => {
@@ -133,7 +141,7 @@ const Board = (props: Board) => {
       >
         Get it!
       </button>
-      {send && <Confetti tweenDuration={150} />}
+      {send && confetti && <Confetti tweenDuration={150} />}
     </div>
   );
 };
