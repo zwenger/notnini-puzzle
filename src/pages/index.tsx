@@ -1,8 +1,15 @@
+import { type NextPage } from "next";
+import Head from "next/head";
 import Link from "next/link";
 
-const landing = () => {
+const Home: NextPage = () => {
   return (
     <div className="flex h-screen ">
+      <Head>
+        <title>Not Nini Puzzle</title>
+        <meta name="description" content="NotNini Puzzle Game 🎲" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <div
         style={{ backgroundImage: "url('/splash_art_lofi.png')" }}
         className="flex w-3/5 items-center justify-center bg-cover bg-center opacity-90"
@@ -71,4 +78,4 @@ const landing = () => {
   );
 };
 
-export default landing;
+export default Home;

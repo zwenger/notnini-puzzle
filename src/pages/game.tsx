@@ -174,7 +174,7 @@ const Tile = (props: {
   );
 };
 
-const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
+const Game: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   tiles,
 }) => {
   const { isSignedIn } = useUser();
@@ -182,8 +182,8 @@ const Home: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   return (
     <div className="flex h-screen flex-col  justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
       <Head>
-        <title>Not Nini Puzzle</title>
-        <meta name="description" content="NotNini Puzzle Game 🎲" />
+        <title>Game</title>
+        <meta name="description" content="🎲" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <nav className="opacity-85 border-b-1 h-auto min-h-[50px] items-start border-black p-2 shadow-lg">
@@ -266,4 +266,4 @@ export const getStaticProps: GetStaticProps<Board> = async () => {
   };
 };
 
-export default Home;
+export default Game;
